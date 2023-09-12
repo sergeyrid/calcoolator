@@ -22,7 +22,7 @@ jobs:
       matrix:
         java: [ '16' ]
 
-    runs-on: [self-hosted, usvm]
+    runs-on: ubuntu-20.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
