@@ -4,7 +4,7 @@ import org.jetbrains.exposed.sql.Column
 
 object Calculations: IntIdTable("calculations", "calcid") {
     val expression: Column<String> = text("expression")
-    val result: Column<String> = varchar("result", 255)
+    val result: Column<String> = text("result")
     val success: Column<Boolean> = bool("success")
 }
 

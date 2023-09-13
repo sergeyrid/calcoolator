@@ -8,6 +8,6 @@ CREATE SEQUENCE calcIdSeq
 CREATE TABLE Calculations (
     CalcId INTEGER DEFAULT nextval('calcIdSeq') NOT NULL,
     Expression TEXT NOT NULL,
-    Result VARCHAR(255) NOT NULL,
+    Result TEXT NOT NULL,
     Success BOOL NOT NULL
 );
