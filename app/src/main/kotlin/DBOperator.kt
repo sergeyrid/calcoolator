@@ -62,10 +62,11 @@ object DBOperator {
         }
     }
 
-    fun getCalculations(num: Int) = transaction {
+    fun getCalculations(from: Int, to: Int) = transaction {
         Calculation.all()
             .reversed()
-            .take(num)
+            .drop(from)
+            .take(to - from)
             .map { CalculationRaw(it.expression, it.result, it.success) }
     }
 
@@ -73,5 +74,10 @@ object DBOperator {
         Calculation.all()
             .reversed()
             .map { CalculationRaw(it.expression, it.result, it.success) }
+    }
+
+    fun clear() = transaction {
+        Calculation.all()
+            .forEach { it.delete() }
     }
 }
