@@ -4,10 +4,16 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Path
 
-data class CalculationRaw(val expr: String, val res: String, val succ: Boolean)
+data class CalculationRaw(val expr: String, val res: String, val succ: Boolean) {
+    override fun toString(): String =
+        if (succ) "Calculation: $expr = $res"
+        else "Calculation FAILED: $expr -> $res"
+}
 
 object DBOperator {
-    fun initDB(dbFileName: String, schemaQueryFileName: String) {
+    const val schemaQueryFileName = "cataloog_schema"
+
+    fun initDB(dbFileName: String) {
         Database.connect("jdbc:h2:./data/${
             dbFileName
                 .trim()
@@ -79,5 +85,14 @@ object DBOperator {
     fun clear() = transaction {
         Calculation.all()
             .forEach { it.delete() }
+    }
+
+    fun deleteDB(dbFileName: String) {
+        Files.deleteIfExists(Path.of("./data/${
+            dbFileName.trim().removeSuffix(".db").removeSuffix(".mv")
+        }.mv.db"))
+        Files.deleteIfExists(Path.of("./data/${
+            dbFileName.trim().removeSuffix(".db").removeSuffix(".mv")
+        }.trace.db"))
     }
 }
