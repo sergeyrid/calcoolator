@@ -2,4 +2,5 @@
 /.gradle/
 /build/
 /app/build/
-/data/*.trace.db
+/data/
+/app/data/

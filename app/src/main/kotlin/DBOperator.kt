@@ -14,8 +14,10 @@ data class CalculationRaw(val expr: String, val res: String, val succ: Boolean) 
 object DBOperator {
     const val schemaQueryFileName = "cataloog_schema"
 
-    private fun extractFileName(fileName: String) =
+    fun extractFileName(fileName: String) =
         Path.of(fileName).nameWithoutExtension
+            .removeSuffix(".mv") // nameWithoutExtension убирает .db, но не .mv/.trace
+            .removeSuffix(".trace")
 
     fun initDB(dbFileName: String) {
         connect(dbFileName) // создаёт базу, если она не существует
@@ -24,6 +26,16 @@ object DBOperator {
 
     fun connect(dbFileName: String) {
         Database.connect("jdbc:h2:./data/${extractFileName(dbFileName)}")
+    }
+
+    fun doesDBExist(dbFileName: String) =
+        Files.exists(Path.of("./data/${extractFileName(dbFileName)}.mv.db"))
+
+    fun connectOrCreate(dbFileName: String) {
+        val didExist = doesDBExist(dbFileName)
+        connect(dbFileName) // теперь база создана
+        if (!didExist)
+            executeSQL(schemaQueryFileName)
     }
 
     fun executeSQL(queryFileName: String) = transaction {

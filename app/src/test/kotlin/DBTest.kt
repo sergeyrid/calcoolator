@@ -1,5 +1,7 @@
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.function.Executable
 import kotlin.random.Random
 
@@ -16,8 +18,21 @@ class DBTest {
     }
 
     @Test
+    fun removeExtensionTest() {
+        assertEquals(DBOperator.extractFileName("sqlquery.sql"), "sqlquery")
+        assertEquals(DBOperator.extractFileName("sqlquery"), "sqlquery")
+        assertEquals(DBOperator.extractFileName("database.mv.db"), "database")
+        assertEquals(DBOperator.extractFileName("database"), "database")
+        assertEquals(DBOperator.extractFileName("database.trace.db"), "database")
+        assertEquals(DBOperator.extractFileName("./data/database.mv.db"), "database")
+        assertEquals(DBOperator.extractFileName("./data/database"), "database")
+        assertEquals(DBOperator.extractFileName("./sql/sqlquery.sql"), "sqlquery")
+    }
+
+    // Также тестирует реакцию на ненужное расширение файла базы
+    @Test
     fun sampleTest() {
-        DBOperator.initDB("test1")
+        DBOperator.initDB("test1.mv.db")
 
         try {
             for (i in 1..10) {
@@ -44,7 +59,7 @@ class DBTest {
                     }
                 })
         } finally {
-            DBOperator.deleteDB("test1")
+            DBOperator.deleteDB("test1.mv.db")
         }
     }
 
@@ -153,6 +168,42 @@ class DBTest {
                 })
         } finally {
             DBOperator.deleteDB("test5")
+        }
+    }
+
+    @Test
+    fun executeSQLTest() {
+        DBOperator.connect("test6") // база создана
+        try {
+            // схема базы пока не задана
+            assertThrows<ExposedSQLException> {
+                DBOperator.addCalculation(CalculationRaw("2 + 3", "5", true))
+            }
+
+            DBOperator.executeSQL(DBOperator.schemaQueryFileName)
+            assertDoesNotThrow {
+                DBOperator.addCalculation(CalculationRaw("2 + 3", "5", true))
+            }
+        } finally {
+            DBOperator.deleteDB("test6")
+        }
+    }
+
+    // Тестирует функции connectOrCreate и doesDBExist,
+    // а также реакцию на ненужное расширение
+    @Test
+    fun dbCreatingTest() {
+        assertFalse(DBOperator.doesDBExist("test7.mv.db"))
+        assertFalse(DBOperator.doesDBExist("test7"))
+        DBOperator.connectOrCreate("test7.mv.db")
+        try {
+            assertTrue(DBOperator.doesDBExist("test7.mv.db"))
+            assertTrue(DBOperator.doesDBExist("test7"))
+            assertDoesNotThrow {
+                DBOperator.addCalculation(CalculationRaw("2 + 3", "5", true))
+            }
+        } finally {
+            DBOperator.deleteDB("test7.mv.db")
         }
     }
 }
