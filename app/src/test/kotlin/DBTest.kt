@@ -7,11 +7,11 @@ class DBTest {
     @Test
     fun calcStringTest() {
         val calcRaw1 = CalculationRaw("2 + 3", "5", true)
-        val calcRaw2 = CalculationRaw("abcd", "efgh", true)
+        val calcRaw2 = CalculationRaw("(((3 × 2) + 90) ÷ 239) − 30 ^ 2", "−899.5983263598326", true)
         val calcRaw3 = CalculationRaw("3 / 0", "Cannot divide by zero", false)
 
         assertEquals(calcRaw1.toString(), "Calculation: 2 + 3 = 5")
-        assertEquals(calcRaw2.toString(), "Calculation: abcd = efgh")
+        assertEquals(calcRaw2.toString(), "Calculation: (((3 × 2) + 90) ÷ 239) − 30 ^ 2 = −899.5983263598326")
         assertEquals(calcRaw3.toString(), "Calculation FAILED: 3 / 0 -> Cannot divide by zero")
     }
 
@@ -22,23 +22,25 @@ class DBTest {
         try {
             for (i in 1..10) {
                 if (i % 2 == 0)
-                    DBOperator.addCalculation("$i", "good", true)
-                else DBOperator.addCalculation("$i", "bad", false)
+                    DBOperator.addCalculation("$i + 1", "${i + 1}", true)
+                else DBOperator.addCalculation("$i / 0", "Cannot divide by zero", false)
             }
             val calcs = DBOperator
                 .getAllCalculations() // !! Не разворачиваем
             assertAll((1..10)
                 .map { i ->
                     Executable {
-                        assertEquals(calcs[i - 1].expr, (11 - i).toString())
+                        assertEquals(calcs[i - 1].expr,
+                            (11 - i).toString() + if (i % 2 != 0) " + 1" else " / 0")
                         // Поскольку они возвратились в обратном порядке,
                         // то теперь нечётные вычисления будут good
-                        assertEquals(calcs[i - 1].res, if (i % 2 != 0) "good" else "bad")
+                        assertEquals(calcs[i - 1].res,
+                            if (i % 2 != 0) "${11 - i + 1}" else "Cannot divide by zero")
                         assertEquals(calcs[i - 1].succ, i % 2 != 0)
 
                         assertEquals(calcs[i - 1].toString(),
-                            if (i % 2 != 0) "Calculation: ${11 - i} = good"
-                            else "Calculation FAILED: ${11 - i} -> bad")
+                            if (i % 2 != 0) "Calculation: ${11 - i} + 1 = ${11 - i + 1}"
+                            else "Calculation FAILED: ${11 - i} / 0 -> Cannot divide by zero")
                     }
                 })
         } finally {
@@ -81,28 +83,22 @@ class DBTest {
 
         try {
             DBOperator.addCalculations((1..20)
-                .map { CalculationRaw("${20 - it}", ":)", true) })
+                .map { CalculationRaw("${20 - it} + 0", "${20 - it}", true) })
 
-            assertEquals(DBOperator.getCalculations(2, 5),
-                (2 until 5).map {
-                    CalculationRaw("$it", ":)", true)
-                })
-            assertEquals(DBOperator.getCalculations(10, 20),
-                (10 until 20).map {
-                    CalculationRaw("$it", ":)", true)
-                })
-            assertEquals(DBOperator.getCalculations(0, 18),
-                (0 until 18).map {
-                    CalculationRaw("$it", ":)", true)
-                })
+            fun testSegment(l: Int, r: Int) =
+                assertEquals(DBOperator.getCalculations(l, r),
+                    (l until r).map {
+                        CalculationRaw("$it + 0", "$it", true)
+                    })
+
+            testSegment(2, 5)
+            testSegment(10, 20)
+            testSegment(0, 18)
 
             for (i in 1..50) {
                 val left = Random.nextInt(0, 19)
                 val right = Random.nextInt(left, 20)
-                assertEquals(DBOperator.getCalculations(left, right),
-                    (left until right).map {
-                        CalculationRaw("$it", ":)", true)
-                    })
+                testSegment(left, right)
             }
         } finally {
             DBOperator.deleteDB("test3")
@@ -146,14 +142,14 @@ class DBTest {
         try {
             DBOperator.addCalculations(
                 (1..num)
-                    .map { CalculationRaw("${num - it}", ";)", false) }
+                    .map { CalculationRaw("(-${num - it}) ^ (1/2)", "Can't raise a negative number to a non-integer power", false) }
             )
 
             val left = Random.nextInt(0, num - 1)
             val right = Random.nextInt(left, num)
             assertEquals(DBOperator.getCalculations(left, right),
                 (left until right).map {
-                    CalculationRaw("$it", ";)", false)
+                    CalculationRaw("(${-it}) ^ (1/2)", "Can't raise a negative number to a non-integer power", false)
                 })
         } finally {
             DBOperator.deleteDB("test5")
