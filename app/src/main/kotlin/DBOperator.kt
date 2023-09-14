@@ -3,6 +3,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.nameWithoutExtension
 
 data class CalculationRaw(val expr: String, val res: String, val succ: Boolean) {
     override fun toString(): String =
@@ -13,60 +14,44 @@ data class CalculationRaw(val expr: String, val res: String, val succ: Boolean) 
 object DBOperator {
     const val schemaQueryFileName = "cataloog_schema"
 
-    fun initDB(dbFileName: String) {
-        Database.connect("jdbc:h2:./data/${
-            dbFileName
-                .trim()
-                .removeSuffix(".db")
-                .removeSuffix(".mv")
-        }", driver = "org.h2.Driver")
-        transaction {
-            @Language("SQL")
-            val dbSchema = Files.readAllLines(
-                Path.of("./sql/${
-                    schemaQueryFileName.trim().removeSuffix(".sql")
-                }.sql")
-            ).joinToString("\n")
+    private fun extractFileName(fileName: String) =
+        Path.of(fileName).nameWithoutExtension
 
-            exec(dbSchema)
-        }
+    fun initDB(dbFileName: String) {
+        connect(dbFileName) // создаёт базу, если она не существует
+        executeSQL(schemaQueryFileName) // запускает скрипт инициализации
     }
 
     fun connect(dbFileName: String) {
-        Database.connect("jdbc:h2:./data/$dbFileName")
+        Database.connect("jdbc:h2:./data/${extractFileName(dbFileName)}")
     }
 
     fun executeSQL(queryFileName: String) = transaction {
         @Language("SQL")
         val query = Files.readAllLines(
-            Path.of("./sql/${
-                queryFileName.trim().removeSuffix(".sql")
-            }.sql")
+            Path.of("./sql/${extractFileName(queryFileName)}.sql")
         ).joinToString("\n")
 
         exec(query)
     }
 
-    fun addCalculation(expr: String, res: String, succ: Boolean) = transaction {
+    // Вызывать эту функцию нужно только внутри транзакции
+    private fun addCalculationDirectly(calc: CalculationRaw) {
         Calculation.new {
-            expression = expr
-            result = res
-            success = succ
+            expression = calc.expr
+            result = calc.res
+            success = calc.succ
         }
     }
 
     fun addCalculation(calc: CalculationRaw) =
-        addCalculation(calc.expr, calc.res, calc.succ)
+        transaction { addCalculationDirectly(calc) }
 
-    fun addCalculations(calcs: List<CalculationRaw>) = transaction {
-        for (calc in calcs) {
-            Calculation.new {
-                expression = calc.expr
-                result = calc.res
-                success = calc.succ
-            }
-        }
-    }
+    fun addCalculation(expr: String, res: String, succ: Boolean) =
+        transaction { addCalculationDirectly(CalculationRaw(expr, res, succ)) }
+
+    fun addCalculations(calcs: List<CalculationRaw>) =
+        transaction { calcs.forEach(::addCalculationDirectly) }
 
     fun getCalculations(from: Int, to: Int) = transaction {
         Calculation.all()
@@ -88,11 +73,9 @@ object DBOperator {
     }
 
     fun deleteDB(dbFileName: String) {
-        Files.deleteIfExists(Path.of("./data/${
-            dbFileName.trim().removeSuffix(".db").removeSuffix(".mv")
-        }.mv.db"))
-        Files.deleteIfExists(Path.of("./data/${
-            dbFileName.trim().removeSuffix(".db").removeSuffix(".mv")
-        }.trace.db"))
+        // Удаляет базу
+        Files.deleteIfExists(Path.of("./data/${extractFileName(dbFileName)}.mv.db"))
+        // Удаляет лог
+        Files.deleteIfExists(Path.of("./data/${extractFileName(dbFileName)}.trace.db"))
     }
 }
