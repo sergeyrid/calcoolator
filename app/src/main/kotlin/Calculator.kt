@@ -11,7 +11,7 @@ class Calculator {
         CLOSE       //")"
     }
 
-    fun toPostfix(expression: String): String {
+    private fun toPostfix(expression: String): String {
 
         val operators = mutableListOf<Char>()
         var postfix = ""
@@ -38,13 +38,6 @@ class Calculator {
                         else throw IllegalArgumentException("Wrong argument")
                     }
 
-                    c == '-' -> {
-                        if (prevToken == Token.OPEN_OR_NOTHING) postfix += " 0"
-                        else if (prevToken == Token.BINARY_OPERATOR) throw IllegalArgumentException("Wrong argument")
-                        operators.add(c)
-                        prevToken = Token.OPEN_OR_NOTHING
-                    }
-
                     c == '(' -> {
                         operators.add(c)
                         prevToken = Token.OPEN_OR_NOTHING
@@ -52,6 +45,8 @@ class Calculator {
                     }
 
                     c == ')' -> {
+                        if (parenthesesCount == 0)
+                            throw IllegalArgumentException("Wrong argument")
                         while (operators.last() != '(') {
                             postfix += " " + "${operators.removeLast()}"
                         }
@@ -62,6 +57,12 @@ class Calculator {
 
                     else -> {
                         if (prevToken == Token.BINARY_OPERATOR) throw IllegalArgumentException("Wrong argument")
+                        if ((c == '-' || c == '+') && prevToken == Token.OPEN_OR_NOTHING) {
+                            postfix += " 0"
+                            operators.add(c)
+                            prevToken = Token.OPEN_OR_NOTHING
+                            continue
+                        }
 
                         while (operators.isNotEmpty() && precedence(operators.last()) >= precedence(c)) {
                             postfix += " " + "${operators.removeLast()}"
@@ -94,30 +95,39 @@ class Calculator {
     }
 
 
-    fun calculateRPN(input: String): Double {
+    private fun calculateRPN(input: String): Double {
+
         val stack = Stack<Double>()
         val tokens = input.split(" ")
 
-        for (token in tokens) {
-            if (token.matches("-?\\d+(\\.\\d+)?".toRegex())) {
-                stack.push(token.toDouble())
-            } else {
-                val b = stack.pop()
-                val a = stack.pop()
+        try {
+            for (token in tokens) {
+                if (token.matches("-?\\d+(\\.\\d+)?".toRegex())) {
+                    stack.push(token.toDouble())
+                } else {
+                    val b = stack.pop()
+                    val a = stack.pop()
 
-                when (token) {
-                    "+" -> stack.push(a + b)
-                    "-" -> stack.push(a - b)
-                    "*" -> stack.push(a * b)
-                    "/" -> {
-                        if (!(a / b).isInfinite()) stack.push(a / b)
-                        else throw ArithmeticException("Illegal operation")
+                    when (token) {
+                        "+" -> stack.push(a + b)
+                        "-" -> stack.push(a - b)
+                        "*" -> stack.push(a * b)
+                        "/" -> stack.push(a / b)
+                        "^" -> stack.push(a.pow(b))
                     }
-
-                    "^" -> stack.push(a.pow(b))
                 }
             }
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Wrong argument")
         }
-        return stack.pop()
+        val result = stack.pop()
+        if (result.isInfinite() || result.isNaN()) throw ArithmeticException("Illegal operation")
+
+        return result
+    }
+
+    fun calculate(expression: String): Double {
+        val result = calculateRPN(toPostfix(expression))
+        return result
     }
 }
