@@ -70,6 +70,13 @@ class CalcTest {
         assertThrows<IllegalArgumentException> { calculator.calculate("1 a 1") }
         assertThrows<IllegalArgumentException> { calculator.calculate("3 4") }
         assertThrows<IllegalArgumentException> { calculator.calculate("5/-3") }
+        assertThrows<IllegalArgumentException> { calculator.calculate("(3) (1) (2) 4 + 5") }
+        assertThrows<IllegalArgumentException> { calculator.calculate("(3(1(2))) 4 + 5") }
+        assertThrows<IllegalArgumentException> { calculator.calculate("(1 + 2) (3 + 4)") }
+        assertThrows<IllegalArgumentException> { calculator.calculate("1 + (2) 3 (4) + 5") }
+
+
+
 
     }
 }

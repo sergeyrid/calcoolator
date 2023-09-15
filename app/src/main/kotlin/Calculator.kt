@@ -123,6 +123,7 @@ class Calculator {
             throw IllegalArgumentException("Wrong argument")
         }
         val result = stack.pop()
+        if (!stack.empty()) throw IllegalArgumentException("Wrong argument")
         if (result.isInfinite() || result.isNaN()) throw ArithmeticException("Illegal operation")
 
         return result
