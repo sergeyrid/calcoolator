@@ -32,13 +32,14 @@ object Server {
                 }
 
                 post("/api/calculate") {
-                    val request = call.request<CalculationRequest>()
-                    val query = request.query
-                    val result = Calculator.calculate(query)
-                    if (result) {
-                        call.respond(true, result)
-                    } else {
-                        call.respond(false, result)
+                    try {
+                        val request = call.receive<CalculationRequest>()
+                        val query = request.query
+                        val result = Calculator.calculate(query)
+
+                        call.respond(mapOf("type" to "success", "result" to result))
+                    } catch (e: Exception) {
+                        call.respond(HttpStatusCode.BadRequest, mapOf("type" to "error", "message" to e.message))
                     }
                 }
             }

@@ -6,7 +6,7 @@ interface RegistryApi {
     fun calc(@Body request: CalculationRequest): Call<String>
 
     @GET("/api/history?limit={N}&before={ID}")
-    fun list(): Call<Map<String, Int>>
+    fun list(): Call<String>
 }
 
 
