@@ -1,38 +1,54 @@
 import java.util.Stack
 import kotlin.math.pow
-import java.io.File
 
 class Calculator {
+
+    private enum class Token {
+        OPEN_OR_NOTHING, //предыдущий символ - "(" (не считая пробел), унарный минус или ничего
+        NUMBER,            //предыдущий символ - число (без пробела)
+        NUMBER_WITH_SPACE,  //предыдущий символ - число+пробел,
+        BINARY_OPERATOR,    //предыдущий символ - знак бинарной операции,
+        CLOSE       //")"
+    }
 
     fun toPostfix(expression: String): String {
 
         val operators = mutableListOf<Char>()
         var postfix = ""
-        var prevIsDigit = false
+        var prevToken: Token = Token.OPEN_OR_NOTHING
+        var parenthesesCount = 0
         try {
             for (c in expression) {
                 when {
-                    c == ' ' -> continue
+                    c == ' ' -> {
+                        if (prevToken == Token.NUMBER) prevToken = Token.NUMBER_WITH_SPACE
+                    }
+
                     c.isDigit() -> {
-                        if (prevIsDigit) postfix += "$c"
-                        else postfix += " $c"
-                        prevIsDigit = true
+                        postfix += when (prevToken) {
+                            Token.NUMBER -> "$c"
+                            Token.NUMBER_WITH_SPACE -> throw IllegalArgumentException("Wrong argument")
+                            else -> " $c"
+                        }
+                        prevToken = Token.NUMBER
                     }
 
                     c == '.' -> {
-                        if (prevIsDigit) postfix += "$c"
+                        if (prevToken == Token.NUMBER) postfix += "$c"
                         else throw IllegalArgumentException("Wrong argument")
                     }
 
                     c == '-' -> {
-                        if (!prevIsDigit) postfix += " 0"
+                        if (prevToken == Token.OPEN_OR_NOTHING) postfix += " 0"
+                        else if (prevToken == Token.BINARY_OPERATOR) throw IllegalArgumentException("Wrong argument")
                         operators.add(c)
-                        prevIsDigit = false
+                        prevToken = Token.OPEN_OR_NOTHING
                     }
 
                     c == '(' -> {
                         operators.add(c)
-                        prevIsDigit = false
+                        prevToken = Token.OPEN_OR_NOTHING
+                        parenthesesCount++
                     }
 
                     c == ')' -> {
@@ -40,18 +56,24 @@ class Calculator {
                             postfix += " " + "${operators.removeLast()}"
                         }
                         operators.removeLast()
-                        prevIsDigit = false
+                        prevToken = Token.CLOSE
+                        parenthesesCount--
                     }
 
                     else -> {
+                        if (prevToken == Token.BINARY_OPERATOR) throw IllegalArgumentException("Wrong argument")
+
                         while (operators.isNotEmpty() && precedence(operators.last()) >= precedence(c)) {
                             postfix += " " + "${operators.removeLast()}"
                         }
                         operators.add(c)
-                        prevIsDigit = false
+                        prevToken = Token.BINARY_OPERATOR
                     }
                 }
             }
+            if (parenthesesCount != 0 || prevToken == Token.BINARY_OPERATOR)
+                throw IllegalArgumentException("Wrong argument")
+
         } catch (e: IllegalArgumentException) {
             throw IllegalArgumentException("Wrong argument")
         }
@@ -70,6 +92,7 @@ class Calculator {
             else -> throw IllegalArgumentException("Wrong argument")
         }
     }
+
 
     fun calculateRPN(input: String): Double {
         val stack = Stack<Double>()
