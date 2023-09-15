@@ -11,23 +11,23 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlin.io.*
 
-
 object Server {
     const val dbname: String = "DB"
     fun Application() {
         embeddedServer(Netty, port = 8081, host = "0.0.0.0") {
+
             println("Server has started its work")
+
             routing {
+
                 get("/api/history?limit={N}&before={ID}") {
                     val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 10
                     val before = call.request.queryParameters["before"]?.toIntOrNull()
-
                     DBOperator.initDB(dbname)
                     val calculations = DBOperator.getAllCalculations()
                     val startIndex = before?.let { it - 10 } ?: 1
                     val endIndex = before ?: (startIndex + limit)
                     val results = calculations.subList(startIndex - 1, endIndex).take(limit)
-
                     call.respond(results)
                 }
 
@@ -36,7 +36,6 @@ object Server {
                         val request = call.receive<CalculationRequest>()
                         val query = request.query
                         val result = Calculator.calculate(query)
-
                         call.respond(mapOf("type" to "success", "result" to result))
                     } catch (e: Exception) {
                         call.respond(HttpStatusCode.BadRequest, mapOf("type" to "error", "message" to e.message))
@@ -45,7 +44,6 @@ object Server {
             }
         }.start(wait = true)
 
-        println("Completed")
+        println("The work completed")
     }
-
 }
