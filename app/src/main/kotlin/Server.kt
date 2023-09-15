@@ -1,6 +1,7 @@
 package server
 
 import db.DBOperator
+import calc.Calculator
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -22,24 +23,24 @@ object Server {
                     val before = call.request.queryParameters["before"]?.toIntOrNull()
 
                     DBOperator.initDB(dbname)
-                    if (before != null) {
-                        call.respond(HttpStatusCode.OK, DBOperator.getCalculations(before - 10, before))
-                    }
-                    else {
-                        call.respond(HttpStatusCode.OK, DBOperator.getCalculations(1, limit))
-                    }
+                    val calculations = DBOperator.getAllCalculations()
+                    val startIndex = before?.let { it - 10 } ?: 1
+                    val endIndex = before ?: (startIndex + limit)
+                    val results = calculations.subList(startIndex - 1, endIndex).take(limit)
+
+                    call.respond(results)
                 }
 
-//                post("/api/calculate") {
-//                    val request = call.request<CalculationRequest>()
-//                    val query = request.query
-//                    val result = Calculation.calculate(query)
-//                    if (result) {
-//                        call.respond("success", result)
-//                    } else {
-//                        call.respond("error", result)
-//                    }
-//                }
+                post("/api/calculate") {
+                    val request = call.request<CalculationRequest>()
+                    val query = request.query
+                    val result = Calculator.calculate(query)
+                    if (result) {
+                        call.respond(true, result)
+                    } else {
+                        call.respond(false, result)
+                    }
+                }
             }
         }.start(wait = true)
 
