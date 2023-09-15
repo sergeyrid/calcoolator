@@ -45,7 +45,7 @@ class Calculator {
                     }
 
                     c == ')' -> {
-                        if (prevToken == Token.OPEN_UNARY_NOTHING)
+                        if (prevToken == Token.OPEN_UNARY_NOTHING || prevToken == Token.BINARY_OPERATOR)
                             throw IllegalArgumentException("Wrong argument")
                         if (parenthesesCount == 0)
                             throw IllegalArgumentException("Wrong argument")
@@ -65,6 +65,7 @@ class Calculator {
                             prevToken = Token.OPEN_UNARY_NOTHING
                             continue
                         }
+                        if (prevToken == Token.OPEN_UNARY_NOTHING) throw IllegalArgumentException("Wrong argument")
 
                         while (operators.isNotEmpty() && precedence(operators.last()) >= precedence(c)) {
                             postfix += " ${operators.removeLast()}"
