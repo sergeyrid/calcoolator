@@ -4,7 +4,7 @@ import kotlin.math.pow
 class Calculator {
 
     private enum class Token {
-        OPEN_OR_NOTHING, //предыдущий символ - "(" (не считая пробел), унарный минус или ничего
+        OPEN_UNARY_NOTHING, //предыдущий символ - "(" (не считая пробел), унарный минус или ничего
         NUMBER,            //предыдущий символ - число (без пробела)
         NUMBER_WITH_SPACE,  //предыдущий символ - число+пробел,
         BINARY_OPERATOR,    //предыдущий символ - знак бинарной операции,
@@ -15,7 +15,7 @@ class Calculator {
 
         val operators = mutableListOf<Char>()
         var postfix = ""
-        var prevToken: Token = Token.OPEN_OR_NOTHING
+        var prevToken: Token = Token.OPEN_UNARY_NOTHING
         var parenthesesCount = 0
         try {
             for (c in expression) {
@@ -40,11 +40,13 @@ class Calculator {
 
                     c == '(' -> {
                         operators.add(c)
-                        prevToken = Token.OPEN_OR_NOTHING
+                        prevToken = Token.OPEN_UNARY_NOTHING
                         parenthesesCount++
                     }
 
                     c == ')' -> {
+                        if (prevToken == Token.OPEN_UNARY_NOTHING)
+                            throw IllegalArgumentException("Wrong argument")
                         if (parenthesesCount == 0)
                             throw IllegalArgumentException("Wrong argument")
                         while (operators.last() != '(') {
@@ -57,10 +59,10 @@ class Calculator {
 
                     c =='-' || c == '+' || c == '^' || c == '*' || c == '/' -> {
                         if (prevToken == Token.BINARY_OPERATOR) throw IllegalArgumentException("Wrong argument")
-                        if ((c == '-' || c == '+') && prevToken == Token.OPEN_OR_NOTHING) {
+                        if ((c == '-' || c == '+') && prevToken == Token.OPEN_UNARY_NOTHING) {
                             postfix += " 0"
                             operators.add(c)
-                            prevToken = Token.OPEN_OR_NOTHING
+                            prevToken = Token.OPEN_UNARY_NOTHING
                             continue
                         }
 
