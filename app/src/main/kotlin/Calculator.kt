@@ -1,4 +1,4 @@
-import java.util.Stack
+import java.util.*
 import kotlin.math.pow
 
 class Calculator {
@@ -48,14 +48,14 @@ class Calculator {
                         if (parenthesesCount == 0)
                             throw IllegalArgumentException("Wrong argument")
                         while (operators.last() != '(') {
-                            postfix += " " + "${operators.removeLast()}"
+                            postfix += " ${operators.removeLast()}"
                         }
                         operators.removeLast()
                         prevToken = Token.CLOSE
                         parenthesesCount--
                     }
 
-                    else -> {
+                    c =='-' || c == '+' || c == '^' || c == '*' || c == '/' -> {
                         if (prevToken == Token.BINARY_OPERATOR) throw IllegalArgumentException("Wrong argument")
                         if ((c == '-' || c == '+') && prevToken == Token.OPEN_OR_NOTHING) {
                             postfix += " 0"
@@ -65,11 +65,13 @@ class Calculator {
                         }
 
                         while (operators.isNotEmpty() && precedence(operators.last()) >= precedence(c)) {
-                            postfix += " " + "${operators.removeLast()}"
+                            postfix += " ${operators.removeLast()}"
                         }
                         operators.add(c)
                         prevToken = Token.BINARY_OPERATOR
                     }
+
+                    else -> throw IllegalArgumentException("Wrong argument")
                 }
             }
             if (parenthesesCount != 0 || prevToken == Token.BINARY_OPERATOR)
@@ -79,7 +81,7 @@ class Calculator {
             throw IllegalArgumentException("Wrong argument")
         }
         while (operators.isNotEmpty()) {
-            postfix += " " + "${operators.removeLast()}"
+            postfix += " ${operators.removeLast()}"
         }
         return postfix.trim()
     }
@@ -117,7 +119,7 @@ class Calculator {
                     }
                 }
             }
-        } catch (e: Exception) {
+        } catch (e: EmptyStackException) {
             throw IllegalArgumentException("Wrong argument")
         }
         val result = stack.pop()
@@ -127,7 +129,6 @@ class Calculator {
     }
 
     fun calculate(expression: String): Double {
-        val result = calculateRPN(toPostfix(expression))
-        return result
+        return calculateRPN(toPostfix(expression))
     }
 }
