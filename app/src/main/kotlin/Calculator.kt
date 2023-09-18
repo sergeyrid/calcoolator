@@ -1,7 +1,7 @@
 import java.util.*
 import kotlin.math.pow
 
-class Calculator {
+object Calculator {
 
     private enum class Token {
         OPEN_UNARY_NOTHING, //предыдущий символ - "(" (не считая пробел), унарный минус или ничего

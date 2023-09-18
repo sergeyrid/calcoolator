@@ -1,5 +1,3 @@
-package db
-
 import org.intellij.lang.annotations.Language
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -75,10 +73,22 @@ object DBOperator {
             .map { CalculationRaw(it.expression, it.result, it.success) }
     }
 
+    fun getCalculationsByID(from: Int, to: Int) = transaction {
+        Calculation.all()
+            .drop(from)
+            .take(to - from)
+            .reversed()
+            .map { CalculationRaw(it.expression, it.result, it.success) }
+    }
+
     fun getAllCalculations() = transaction {
         Calculation.all()
             .reversed()
             .map { CalculationRaw(it.expression, it.result, it.success) }
+    }
+
+    fun getAllCalculationsCount() = transaction {
+        Calculation.all().count().toInt()
     }
 
     fun clear() = transaction {

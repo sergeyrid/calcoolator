@@ -1,5 +1,5 @@
-import server.Server
+
 fun main() {
-    //println("Hello World!")
-    Server.Application()
+    println("Hello World!")
+    Server.launch()
 }
