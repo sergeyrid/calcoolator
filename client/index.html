@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/css/pico.min.css" />
+  <link rel="stylesheet" href="/css/picomod.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <script type="application/javascript" src="/js/script.js" defer></script>
+  <title>Document</title>
+</head>
+
+<body>
+  <header id="title">
+    <h1>Calcoolator</h1>
+  </header>
+  <main class="container" id="main">
+    <section id="display">
+      <input type="text" id="input" placeholder="Введите выражение" />
+      <button id="btn-eq" class="contrast">=</button>
+
+      <button class="btn-input" id="btn-0">0</button>
+      <button class="btn-input" id="btn-1">1</button>
+      <button class="btn-input" id="btn-2">2</button>
+      <button class="btn-input" id="btn-3">3</button>
+      <button class="btn-input" id="btn-4">4</button>
+      <button class="btn-input" id="btn-5">5</button>
+      <button class="btn-input" id="btn-6">6</button>
+      <button class="btn-input" id="btn-7">7</button>
+      <button class="btn-input" id="btn-8">8</button>
+      <button class="btn-input" id="btn-9">9</button>
+      <button class="btn-input" id="btn-perd">.</button>
+      <button class="secondary btn-input" id="btn-mul">*</button>
+      <button class="secondary btn-input" id="btn-div">/</button>
+      <button class="secondary btn-input" id="btn-add">+</button>
+      <button class="secondary btn-input" id="btn-subt">-</button>
+      <button class="secondary btn-input" id="btn-pow">^</button>
+      <button class="secondary btn-input" id="btn-opar">(</button>
+      <button class="secondary btn-input" id="btn-cpar">)</button>
+      <button class="contrast" id="btn-clr">C</button>
+      <button class="contrast" id="btn-bs">⬅</button>
+    </section>
+
+    <section id="history">
+      <h5>История запросов:</h5>
+      <div id="history-items"></div>
+    </section>
+  </main>
+</body>
+
+</html>
