@@ -1,0 +1,179 @@
+#main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 64px;
+  align-items: flex-start;
+  height: 70vh;
+}
+
+#title {
+  text-align: center;
+  padding-top: 24px;
+  padding-bottom: 0;
+}
+
+article {
+  padding-top: 24px;
+  padding-bottom: 24px;
+  position: relative;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--primary);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+article > span {
+  max-width: 100%;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-wrap: nowrap;
+  white-space: nowrap;
+}
+
+article::before {
+  box-shadow: 0 8px 24px 4px var(--primary);
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: 0.3s;
+  z-index: -1;
+}
+
+article:hover::before {
+  opacity: 0.15;
+  transition: 0.3s;
+}
+
+#display {
+  flex: 2 0 360px;
+  height: 50%;
+
+  display: grid;
+
+  grid-template-rows: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 8px;
+
+  grid-template-areas:
+    'input      input     input     btn-eq'
+    'btn-clr    btn-opar  btn-cpar  btn-bs'
+    'btn-7      btn-8     btn-9     btn-add'
+    'btn-4      btn-5     btn-6     btn-subt'
+    'btn-1      btn-2     btn-3     btn-mul'
+    'btn-perd   btn-0     btn-pow   btn-div';
+}
+
+#history {
+  flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#history-items {
+  padding-right: 24px;
+  overflow-y: scroll;
+}
+
+#display * {
+  padding: 24px 0;
+  margin: 0;
+}
+
+#display input {
+  padding: 24px 12px;
+  height: auto;
+}
+
+#input {
+  grid-area: input;
+}
+
+#btn-0 {
+  grid-area: btn-0;
+}
+
+#btn-1 {
+  grid-area: btn-1;
+}
+
+#btn-2 {
+  grid-area: btn-2;
+}
+
+#btn-3 {
+  grid-area: btn-3;
+}
+
+#btn-4 {
+  grid-area: btn-4;
+}
+
+#btn-5 {
+  grid-area: btn-5;
+}
+
+#btn-6 {
+  grid-area: btn-6;
+}
+
+#btn-7 {
+  grid-area: btn-7;
+}
+
+#btn-8 {
+  grid-area: btn-8;
+}
+
+#btn-9 {
+  grid-area: btn-9;
+}
+
+#btn-mul {
+  grid-area: btn-mul;
+}
+
+#btn-div {
+  grid-area: btn-div;
+}
+
+#btn-add {
+  grid-area: btn-add;
+}
+
+#btn-subt {
+  grid-area: btn-subt;
+}
+
+#btn-perd {
+  grid-area: btn-perd;
+}
+
+#btn-pow {
+  grid-area: btn-pow;
+}
+
+#btn-opar {
+  grid-area: btn-opar;
+}
+
+#btn-cpar {
+  grid-area: btn-cpar;
+}
+
+#btn-eq {
+  grid-area: btn-eq;
+}
+
+#btn-clr {
+  grid-area: btn-clr;
+}
