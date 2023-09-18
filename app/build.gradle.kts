@@ -1,5 +1,6 @@
 plugins {
     id("kotlin")
+    kotlin("plugin.serialization") version "1.4.21"
 }
 
 repositories {
