@@ -28,7 +28,7 @@ const BASE_URL = '/api'
 
 /** @typedef {string[]} CalculatorHistory */
 
-class CalculateError extends Error {}
+class CalculateError extends Error { }
 
 /** @type {HTMLInputElement} */
 const inputElement = document.getElementById('input')
@@ -47,6 +47,10 @@ const bsButton = document.getElementById('btn-bs')
 
 /** @type {HTMLElement} */
 const historyItems = document.getElementById('history-items')
+
+
+inputElement.addEventListener('keydown', inputEnterHandler)
+inputElement.addEventListener('keyup', inputEnterKeyUpHandler)
 
 for (const inputButton of inputButtons) {
   inputButton.addEventListener('click', appendCharacterHandler)
@@ -142,6 +146,7 @@ const render = {
 
 const state = {
   clearWhenAppend: false,
+  enterPressed: false,
 }
 
 /**
@@ -155,13 +160,37 @@ function historyClickHandler(e) {
 }
 
 /**
+ * @param {KeyboardEvent} e
+ */
+async function inputEnterHandler(e) {
+  if (e.code !== 'Enter' || state.enterPressed) return
+
+  state.enterPressed = true
+
+  await calculateHandler()
+}
+
+/**
+ * @param {KeyboardEvent} e
+ */
+async function inputEnterKeyUpHandler(e) {
+  if (e.code !== 'Enter') return
+
+  state.enterPressed = false
+}
+
+
+/**
  * @param {MouseEvent} e
  */
 function appendCharacterHandler(e) {
   /** @type {HTMLInputElement} */
   const element = e.target
 
-  if (state.clearWhenAppend) clearInput()
+  if (state.clearWhenAppend) {
+    clearInput()
+    state.clearWhenAppend = false
+  }
 
   inputElement.value += element.textContent
 }
